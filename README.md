@@ -3,7 +3,7 @@
 
 This short script will use quantum circuits given in the inverted ICM format and prepare them to a graphical representation in the lattice surgery model. This model, however, is not yet optimized for efficient space time volumes.
 
-The code is a part of a paper *Lattice Surgery Translation for Quantum Computation* by D. Herr, F. Nori and S. J. Devitt and can be found on the arxiv: <http://www.arxiv.org>
+The code is a part of a paper *Lattice Surgery Translation for Quantum Computation* by D. Herr, F. Nori and S. J. Devitt and can be found on the arxiv: <http://arxiv.org/abs/1608.05208>
 
 
 #### Input
