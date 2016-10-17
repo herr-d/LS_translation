@@ -25,7 +25,6 @@ class IICMCircuit:
                 gate = self.__gatepos__()[0]
                 self.move_front(gate)
                 self.deleteCNOTS_front()
-
         #merge same cnots
         self.simplify()
         return
@@ -62,6 +61,7 @@ class IICMCircuit:
     def resolve_swap(self,state):
         if not self.detect_swap(state):
             return
+        print("detected swap")
         #delete gate state and state+1
         swap1=self._circ.gates[state].targets[0]
         swap2=self._circ.gates[state].controls[0]
@@ -86,7 +86,8 @@ class IICMCircuit:
         Delete redundant CNOTS at the front of the circuit
         """
         targeted=[]
-        while(len(self._circ.gates) and(self._circ.gates[0].controls[0] in self.__indexch__()) and (not self._circ.gates[0].controls[0] in targeted)):
+        #while(len(self._circ.gates) and (self._circ.gates[0].controls[0] in self.__indexch__()) and (not self._circ.gates[0].controls[0] in targeted)):
+        while(len(self._circ.gates) and (self._circ.gates[0].controls[0] in self.__indexch__() or (not self._circ.gates[0].targets[0] in self.__indexch__())) and (not self._circ.gates[0].controls[0] in targeted)):
             #delete CNOT
             deleted = self._circ.gates.pop(0)
             for t in deleted.targets:
@@ -127,24 +128,25 @@ class IICMCircuit:
         self._circ.png
 
 
-    def simplify(self):
-        """
-        two identical cnots without any change between them cancel
-        """
-        offset = 0
-        todel= []
+    def simplify_loop(self):
         for i in range(len(self._circ.gates)):
             for j in range(i):
                 if self._circ.gates[i].controls == self._circ.gates[j].controls and self._circ.gates[i].targets == self._circ.gates[j].targets:
                     #move them together then delete
                     if not self.permutation(i,j):
-                        todel.append(i)
-                        todel.append(j)
-                    break
-        todel=sorted(todel)
-        for i in reversed(todel):
-            self._circ.gates.pop(i)
-        return
+                        self._circ.gates.pop(i)
+                        self._circ.gates.pop(j)
+                        return True
+        return False
+
+    def simplify(self):
+        """
+        two identical cnots without any change between them cancel
+        """
+        res = self.simplify_loop()
+        while(res == True):
+            res=self.simplify_loop()
+        return    
 
     def permutation(self,i,j):
         """
@@ -179,7 +181,6 @@ class IICMCircuit:
             self.translate_circuit()
 
         assert(self.check())
-
         blocks = {}
         for i in range(len(self._circ.gates)):
             cont = self._circ.gates[i].controls[0]
